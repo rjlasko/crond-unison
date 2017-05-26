@@ -1,18 +1,19 @@
 #!/bin/sh
-set -e
+set -ex
 
 
-# always build OCaml from source as Unison is version dependent on OCaml
-OCAML_VERSION=4.02.2
-OCAML_MINOR_VERSION=4.02
-UNISON_VERSION=2.48.3
+# Ensure that version numbers are set
+: "${UNISON_VERSION:?ERROR: not set!}"
+: "${OCAML_VERSION:?ERROR: not set!}"
+# derive the minor version number of OCaml
+OCAML_MINOR_VERSION=$(echo $OCAML_VERSION | cut -f1,2 -d'.')
 
 
 # Install applications to support compilation + build of Unison
 mkdir -p /tmp/src
 
 
-# Build OCaml
+# always build OCaml from source as Unison is version dependent on OCaml
 apk add --update --no-cache gcc make musl-dev curl
 curl -L http://caml.inria.fr/pub/distrib/ocaml-${OCAML_MINOR_VERSION}/ocaml-${OCAML_VERSION}.tar.gz | tar zx -C /tmp/src
 chmod -R 0777 /tmp/src/ocaml-${OCAML_VERSION}/*
@@ -32,10 +33,12 @@ mv /tmp/src/unison-${UNISON_VERSION}/unison /usr/bin
 mv /tmp/src/unison-${UNISON_VERSION}/unison-fsmonitor /usr/bin
 
 
-# TODO: add SSH
+# add SSH for remote Unison operations
+apk add --update --no-cache openssh
 
 
+# remove all installation-only packages
 apk del gcc make musl-dev curl bash
-
+# and clear the apk cache
 rm -rf /var/cache/apk/*
 
