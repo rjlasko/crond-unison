@@ -1,4 +1,5 @@
 .git
+.gitignore
+.project
 logo.png
 Unison.gif
-
